@@ -1,4 +1,17 @@
-import json
+'''
+Pull data from Legiscan API
+
+LEGISCAN_API_KEY environment variable must be set with valid API key for the
+script to succeed
+
+Usage:
+python legiscan.py
+
+Options:
+-j / --json - Write API output to JSON file
+'''
+import argparse, json
+
 from os import environ
 from typing import Any, Dict
 
@@ -14,12 +27,19 @@ STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
           "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
 
-def get_state_bills() -> None:
+def init_argparse() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-j", "--json", action="store_true",
+                        help="Write API data to JSON files")
+    return parser
+
+
+def get_state_bills(write_json: bool) -> None:
     for state in STATES:
-        fetch_state_bills(state)
+        fetch_state_bills(state, write_json)
 
 
-def fetch_state_bills(state: str) -> Dict[str, Any]:
+def fetch_state_bills(state: str, write_json: bool) -> Dict[str, Any]:
     payload = {
         'key': LEGISCAN_API_KEY,
         'op': LEGISCAN_API_OP,
@@ -29,7 +49,8 @@ def fetch_state_bills(state: str) -> Dict[str, Any]:
     resp.raise_for_status()
 
     data = resp.json()
-    write_json_file(state, data)
+    if write_json:
+        write_json_file(state, data)
     return data
 
 
@@ -41,7 +62,10 @@ def write_json_file(state: str, data: Dict[str, Any]) -> None:
 def main() -> None:
     if not LEGISCAN_API_KEY:
         raise RuntimeError('API Key not defined')
-    get_state_bills()
+    parser = init_argparse()
+    args = parser.parse_args()
+    write_json = args.json
+    get_state_bills(write_json)
 
 
 if __name__ == '__main__':
