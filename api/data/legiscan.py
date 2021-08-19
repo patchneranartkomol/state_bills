@@ -76,11 +76,17 @@ def write_json_file(state: str, data: Dict[str, Any]) -> None:
 
 
 def write_to_database(state: str, data: Dict[str, Any], session: SessionLocal) -> None:
-    #TODO: Add session key info to bill table schema
+    session_info = data['masterlist']['session']
+    session_id = session_info['session_id']
+    session_name = session_info['session_name']
     bill_data = [b for key, b in data['masterlist'].items() if key != 'session']
     for bill in bill_data:
-        session.add(Bill(**bill))
-
+        session.add(Bill(state=state,
+                         session_id=session_id,
+                         session=session_name,
+                         **bill))
+    # TODO: status_date or last_action_date may have invalid value '0000-00-00'
+    # Need to catch those errors, if present, prior to committing to DB
     session.commit()
 
 

@@ -17,3 +17,7 @@ class Bill(Base):
     last_action = Column(String)
     title = Column(String)
     description = Column(String)
+    state = Column(String(2))
+    #TODO - normalize session to its own table / model
+    session = Column(String)
+    session_id = Column(Integer)

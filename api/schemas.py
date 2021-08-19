@@ -16,6 +16,9 @@ class BillBase(BaseModel):
     last_action: str
     title: str
     description: Optional[str] = None
+    state: str
+    session: str
+    session_id: int
 
     class Config:
         orm_mode = True
