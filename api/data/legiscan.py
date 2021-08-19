@@ -5,7 +5,7 @@ LEGISCAN_API_KEY environment variable must be set with valid API key for the
 script to succeed
 
 Usage:
-python legiscan.py
+python -m api.data.legiscan
 
 Options:
 -j / --json - Write API output to JSON file
@@ -16,6 +16,9 @@ from os import environ
 from typing import Any, Dict
 
 import requests
+
+from ..database import engine, SessionLocal
+from ..models import Bill
 
 LEGISCAN_API_KEY = environ.get('LEGISCAN_API_KEY')
 LEGISCAN_API_URL = 'https://api.legiscan.com/'
@@ -34,9 +37,22 @@ def init_argparse() -> argparse.ArgumentParser:
     return parser
 
 
-def get_state_bills(write_json: bool) -> None:
+def setup_database() -> SessionLocal:
+    '''
+    TODO: Use Alembic or other migration tool
+    For now - this drops and recreates tables in local DB
+    '''
+    Bill.metadata.drop_all(engine)
+    Bill.metadata.create_all(engine)
+
+    session = SessionLocal()
+    return session
+
+
+def get_state_bills(write_json: bool, session: SessionLocal) -> None:
     for state in STATES:
-        fetch_state_bills(state, write_json)
+        data = fetch_state_bills(state, write_json)
+        write_to_database(state, data, session)
 
 
 def fetch_state_bills(state: str, write_json: bool) -> Dict[str, Any]:
@@ -59,13 +75,23 @@ def write_json_file(state: str, data: Dict[str, Any]) -> None:
         json.dump(data, f)
 
 
+def write_to_database(state: str, data: Dict[str, Any], session: SessionLocal) -> None:
+    #TODO: Add session key info to bill table schema
+    bill_data = [b for key, b in data['masterlist'].items() if key != 'session']
+    for bill in bill_data:
+        session.add(Bill(**bill))
+
+    session.commit()
+
+
 def main() -> None:
     if not LEGISCAN_API_KEY:
         raise RuntimeError('API Key not defined')
     parser = init_argparse()
     args = parser.parse_args()
     write_json = args.json
-    get_state_bills(write_json)
+    session = setup_database()
+    get_state_bills(write_json, session)
 
 
 if __name__ == '__main__':
