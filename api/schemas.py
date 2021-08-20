@@ -8,11 +8,9 @@ class BillBase(BaseModel):
     bill_id: int
     # Legislative bill numbers are strings - i.e. 'AB6'
     number: str
-    change_hash: str
-    url: str
-    status_date: date
+    status_date: Optional[date] = None
     status: int
-    last_action_date: date
+    last_action_date: Optional[date] = None
     last_action: str
     title: str
     description: Optional[str] = None
@@ -20,9 +18,13 @@ class BillBase(BaseModel):
     session: str
     session_id: int
 
-    class Config:
-        orm_mode = True
-
 
 class BillCreate(BillBase):
-    pass
+    change_hash: str
+    url: str
+
+
+class Bill(BillBase):
+
+    class Config:
+        orm_mode = True
