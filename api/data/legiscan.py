@@ -17,17 +17,13 @@ from typing import Any, Dict
 
 import requests
 
+from ..constants import STATES
 from ..database import engine, SessionLocal
 from ..models import Bill
 
 LEGISCAN_API_KEY = environ.get('LEGISCAN_API_KEY')
 LEGISCAN_API_URL = 'https://api.legiscan.com/'
 LEGISCAN_API_OP = 'getMasterList'
-STATES = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
 
 def init_argparse() -> argparse.ArgumentParser:

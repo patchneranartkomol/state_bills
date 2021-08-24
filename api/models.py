@@ -18,6 +18,6 @@ class Bill(Base):
     title = Column(String)
     description = Column(String)
     state = Column(String(2))
-    #TODO - normalize session to its own table / model
+    #TODO - normalize legislative session to its own table / model
     session = Column(String)
     session_id = Column(Integer)
