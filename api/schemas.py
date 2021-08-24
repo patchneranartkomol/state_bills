@@ -1,7 +1,13 @@
 from datetime import date
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel
+
+from .constants import STATES
+
+
+StateEnum = Enum('StateEnum', {st: st for st in STATES})
 
 
 class BillBase(BaseModel):
@@ -14,7 +20,7 @@ class BillBase(BaseModel):
     last_action: str
     title: str
     description: Optional[str] = None
-    state: str
+    state: StateEnum
     session: str
     session_id: int
 
@@ -28,3 +34,10 @@ class Bill(BillBase):
 
     class Config:
         orm_mode = True
+
+
+class HTTPError(BaseModel):
+    """
+    HTTP error schema to be used when an `HTTPException` is thrown.
+    """
+    detail: str
